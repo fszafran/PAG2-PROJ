@@ -10,3 +10,5 @@ Za atrakcje turystyczne przy tworzeniu warstwy uznane zostały obiekty:
 9. museum
 10. viewpoint
 11. atourist attraction
+
+Obiektów jest 492
