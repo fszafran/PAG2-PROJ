@@ -1,5 +1,5 @@
 import arcpy
-from HelperClasses import Node, Edge, Graph
+from HelperClasses import *
 import time
 
 def prepare_data(kopia_drogi_torun, atrakcje):
@@ -16,11 +16,13 @@ def prepare_data(kopia_drogi_torun, atrakcje):
 
 def generate_graph(warstwa_drog):
     graph = Graph()
-    with arcpy.da.SearchCursor(warstwa_drog, ["SHAPE@", "Join_Count"]) as cursor:
+    with arcpy.da.SearchCursor(warstwa_drog, ["SHAPE@", "Join_Count", "klasaDrogi"]) as cursor:
         for i, row in enumerate(cursor):
             geometry = row[0]
             attraction_number = row[1]
+            klasa_drogi = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
             length = geometry.length
+            
             firstX = round(geometry.firstPoint.X)
             firstY = round(geometry.firstPoint.Y)
             lastX = round(geometry.lastPoint.X)
@@ -32,7 +34,7 @@ def generate_graph(warstwa_drog):
             graph.add_node(firstNode)
             graph.add_node(lastNode)
 
-            edge = Edge(i, firstNode.id, lastNode.id, length, attraction_number)
+            edge = Edge(i, firstNode.id, lastNode.id, length, klasa_drogi, attraction_number)
             graph.add_edge(edge)
     return graph
 
