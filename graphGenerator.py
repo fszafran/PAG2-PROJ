@@ -14,12 +14,26 @@ def prepare_data(kopia_drogi_torun, atrakcje):
     arcpy.management.JoinField(kopia_drogi_torun, "ID1", joined, "ID1", ["Join_Count"])
     return kopia_drogi_torun
 
-def generate_graph(warstwa_drog):
+def calculate_attraction_weights(attraction_counts: Set[int]) -> Dict[int, int]:
+    weighted_attractions = {}
+    sorted_counts = sorted(attraction_counts, reverse=True)
+    for i, count in enumerate(sorted_counts):
+        weighted_attractions[count] = i + 1
+    return weighted_attractions
+
+def generate_graph(warstwa_drog) -> Graph:
     graph = Graph()
+    attraction_counts = set()
+
+    with arcpy.da.SearchCursor(warstwa_drog, ["Join_Count"]) as cursor:
+        for row in cursor:
+            attraction_counts.add(row[0])
+    weighted_attractions: Dict[int, int] = calculate_attraction_weights(attraction_counts)
+
     with arcpy.da.SearchCursor(warstwa_drog, ["SHAPE@", "Join_Count", "klasaDrogi"]) as cursor:
         for i, row in enumerate(cursor):
             geometry = row[0]
-            attraction_number = row[1]
+            attraction_number = weighted_attractions[row[1]] # im wiecej atrakcji tym mniejsza waga/koszt
             klasa_drogi = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
             length = geometry.length
             
