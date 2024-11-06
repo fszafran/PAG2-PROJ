@@ -1,6 +1,7 @@
 import arcpy
 from HelperClasses import *
 import time
+from algorithm import algorithm
 
 def prepare_data(kopia_drogi_torun, atrakcje):
     """
@@ -65,7 +66,6 @@ if __name__ == "__main__":
     # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
 
     graph = generate_graph(drogi_torun)
-    
-    print(graph.graph)
+    print(algorithm(graph, [476023, 573797], [479470, 573184], 1))
     end = time.time()
     print(end - start)

@@ -2,7 +2,7 @@ from typing import List, Tuple, Set, Dict
 from enum import Enum
 
 class Edge:
-    def __init__(self, id: int, id_from: str, id_to: str, length: float, road_category: float, number_of_attractions: int):
+    def __init__(self, id: int, id_from: str, id_to: str, length: float, road_category: int, number_of_attractions: int):
         self.id = id
         self.id_from = id_from
         self.id_to = id_to

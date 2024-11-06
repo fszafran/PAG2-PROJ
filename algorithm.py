@@ -2,7 +2,6 @@ import numpy as np
 from HelperClasses import *
 from typing import List, Dict
 from queue import PriorityQueue
-import testGraphGenerator
 
 def heuristic(from_node_id: str, to_node_id: str) -> float:
     x1, y1 = map(float, from_node_id.split("_"))
@@ -65,11 +64,5 @@ def algorithm(graph: Graph, start: List[float], end: List[float], route_type: in
                     open_set_hash.add(neighbour_id)
     return []  
   
-if __name__ == "__main__":
-    graph = testGraphGenerator.generate_graph()
-    start = [0, 0]
-    end = [2, 2]
-    route_type = 0
-    print(algorithm(graph, start, end, route_type))
     
     
