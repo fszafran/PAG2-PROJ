@@ -12,16 +12,17 @@ class Edge:
 
     def get_end(self) -> str:
         return self.id_to
+   
+    def get_appropriate_cost(self, route_type: int) -> float:
+        if route_type == 0:
+            return (self.length / self.road_category)
+        elif route_type == 1:
+            return self.length
+        elif route_type == 2:
+            return self.number_of_attractions
+        else:
+            raise ValueError("Niepoprawny typ trasy, poprawne wartości to: 0, 1, 2")
     
-    def cost_length(self) -> float:
-        return self.length
-    
-    def cost_time(self) -> float:
-        return self.length / self.road_category
-    
-    def cost_attractions(self) -> int:
-        return self.number_of_attractions
-
     def __repr__(self) -> str:
         return f"Edge {self.id} from {self.id_from} to {self.id_to}"
 
@@ -39,7 +40,9 @@ class Node:
         self.edges = set()
 
     def generate_id(self) -> str:
-        return f"{self.x}_{self.y}"
+        x = round(self.x)
+        y = round(self.y)
+        return f"{x}_{y}"
 
     def add_edge(self, edge: Edge):
         self.edges.add(edge)
@@ -48,7 +51,7 @@ class Node:
         return [(edge, edge.get_end()) for edge in self.edges]
     
     def __repr__(self) -> str:
-        return f"Node {self.id}"
+        return f"{self.id}"
     
 class Graph:
     def __init__(self):
