@@ -38,10 +38,10 @@ def generate_graph(warstwa_drog) -> Graph:
             klasa_drogi = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
             length = geometry.length
             
-            firstX = round(geometry.firstPoint.X)
-            firstY = round(geometry.firstPoint.Y)
-            lastX = round(geometry.lastPoint.X)
-            lastY = round(geometry.lastPoint.Y)
+            firstX = geometry.firstPoint.X
+            firstY = geometry.firstPoint.Y
+            lastX = geometry.lastPoint.X
+            lastY = geometry.lastPoint.Y
 
             firstNode = Node(firstX, firstY)
             lastNode = Node(lastX, lastY)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     # kopia_drogi_torun = arcpy.management.CopyFeatures(drogi_torun, "kopia_drogi_torun")
     # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
 
-    graph = generate_graph(drogi_torun)
+    graph = generate_graph("kopia_drogi_torun")
     print(algorithm(graph, [476023, 573797], [479470, 573184], 1))
     end = time.time()
     print(end - start)
