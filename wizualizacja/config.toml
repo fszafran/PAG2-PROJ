@@ -1,0 +1,13 @@
+packages = ["numpy", "pyproj"]
+
+interpreter = "0.23.4"
+
+[files]
+"./main.py" = "main.py"
+"/algorithm.py" = "algorithm.py"
+"/HelperClasses.py" = "HelperClasses.py"
+
+
+[js_modules.main]
+"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" = "leaflet" # CSS
+"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet-src.esm.js" = "leaflet"

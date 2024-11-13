@@ -24,13 +24,23 @@ class Edge:
             raise ValueError("Niepoprawny typ trasy, poprawne wartości to: 0, 1, 2")
     
     def __repr__(self) -> str:
-        return f"Edge {self.id} from {self.id_from} to {self.id_to}"
+        return f"From {self.id_from} to {self.id_to}"
 
     def __hash__(self) -> int:
         return hash((self.id_from, self.id_to, self.length))
 
     def __eq__(self, other: 'Edge') -> bool:
         return (self.id_from, self.id_to, self.length) == (other.id_from, other.id_to, other.length)
+
+    def to_json(self) -> Dict:
+        return {
+            "id": self.id,
+            "id_from": self.id_from,
+            "id_to": self.id_to,
+            "length": self.length,
+            "road_category": self.road_category,
+            "number_of_attractions": self.number_of_attractions
+        }
 
 class Node:
     def __init__(self, x: float, y: float):
@@ -53,9 +63,18 @@ class Node:
     def __repr__(self) -> str:
         return f"{self.id}"
     
+    def to_json(self) -> Dict:
+        return {
+            "x": self.x,
+            "y": self.y,
+            "edges": [edge.to_json() for edge in self.edges]
+        }
+
 class Graph:
-    def __init__(self):
+    def __init__(self, json_file: str = None):
         self.graph: Dict[str, Node] = {}
+        if json_file:
+            self.from_json(json_file)
 
     def add_node(self, node: Node):
         if node.id not in self.graph:
@@ -68,6 +87,20 @@ class Graph:
         if edge.id_to in self.graph:
             reversed_edge = Edge(edge.id, edge.id_to, edge.id_from, edge.length, edge.road_category, edge.number_of_attractions)
             self.graph[edge.id_to].add_edge(reversed_edge)
+
+    def from_json(self, json_dict: Dict):
+        for _, node in json_dict.items():
+            x = node["x"]
+            y = node["y"]
+            self.add_node(Node(x, y))
+            for edge in node["edges"]:
+                id = edge["id"]
+                id_from = edge["id_from"]
+                id_to = edge["id_to"]
+                length = edge["length"]
+                road_category = edge["road_category"]
+                number_of_attractions = edge["number_of_attractions"]
+                self.graph[id_from].add_edge(Edge(id, id_from, id_to, length, road_category, number_of_attractions))
 
 class Category(Enum):
     AUTOSTRADA = 140
