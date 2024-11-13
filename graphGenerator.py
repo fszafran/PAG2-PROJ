@@ -2,6 +2,8 @@ import arcpy
 from HelperClasses import *
 import time
 from algorithm import algorithm
+import geopandas as gpd
+import json
 
 def prepare_data(kopia_drogi_torun, atrakcje):
     """
@@ -42,9 +44,11 @@ def generate_graph(warstwa_drog) -> Graph:
             firstY = geometry.firstPoint.Y
             lastX = geometry.lastPoint.X
             lastY = geometry.lastPoint.Y
-
+            
             firstNode = Node(firstX, firstY)
             lastNode = Node(lastX, lastY)
+
+            print(firstNode.id, lastNode.id)
 
             graph.add_node(firstNode)
             graph.add_node(lastNode)
@@ -53,19 +57,48 @@ def generate_graph(warstwa_drog) -> Graph:
             graph.add_edge(edge)
     return graph
 
+def roads_to_JSON(warstwa_drog: str) -> None:
+    json_dict = {}
+    gdf = gpd.read_file(warstwa_drog)
+    for _, row in gdf.iterrows():
+        geometry= row["geometry"]
+        firstX, firstY = geometry.coords[0]
+        firstX = round(firstX)
+        firstY = round(firstY)
+
+        lastX, lastY = geometry.coords[-1]
+        lastX = round(lastX)
+        lastY = round(lastY)
+
+        key = f"{firstX}_{firstY}_{lastX}_{lastY}"
+        json_dict[key] = list(geometry.coords)
+    with open("roads.json", "w") as f:
+        json.dump(json_dict, f, indent=4)
+    
+def graph_to_JSON(graph: Graph) -> None:
+    json_dict = {}
+    for node_id, node in graph.graph.items():
+        node_id: str
+        node: Node
+        json_dict[node_id] = node.to_json()
+    with open("graph.json", "w") as f:
+        json.dump(json_dict, f, indent=4)
 
 if __name__ == "__main__":
     start = time.time()
     arcpy.env.workspace = r"C:\Users\filo1\Desktop\szkola_sem5\PAG2\proj1\arcgis_proj\MyProject.gdb"
     arcpy.env.overwriteOutput = True
 
-    atrakcjeLayer = arcpy.ListFeatureClasses("attr*")[0]
-    drogi_torun = arcpy.ListFeatureClasses("L4*")[0]
+    # atrakcjeLayer = arcpy.ListFeatureClasses("attr*")[0]
+    # drogi_torun = arcpy.ListFeatureClasses("L4*")[0]
 
-    # kopia_drogi_torun = arcpy.management.CopyFeatures(drogi_torun, "kopia_drogi_torun")
-    # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
+    # # kopia_drogi_torun = arcpy.management.CopyFeatures(drogi_torun, "kopia_drogi_torun")
+    # # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
 
     graph = generate_graph("kopia_drogi_torun")
-    print(algorithm(graph, [476023, 573797], [479470, 573184], 1))
+    # # graph_to_JSON(graph)
+    # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
+    # print(algorithm(graph, [476023, 573797], [479470, 573184], 1))
+    # graph = Graph("graph.json")
     end = time.time()
     print(end - start)
