@@ -34,7 +34,7 @@
         <py-script>
             from pyodide.ffi import create_proxy
             from pyscript.js_modules import leaflet as L
-            from main import calculate_path, get_path_parts
+            from main import calculate_path, get_path_parts, find_closest_node
             from HelperClasses import Graph
             import io
             import pyodide
@@ -76,10 +76,12 @@
                 start = time.time()
                 route_type = int(document.getElementById("routeKind").value)
                 print(route_type)
-                #TODO: nawiazywanie na siatce 1x1
                 #470829_575080
                 #479301_569080
-                path = calculate_path(graph, 470829, 575080, 479301, 569080, route_type)
+                xy_start = find_closest_node(xStart, yStart, graph)
+                xy_end = find_closest_node(xEnd, yEnd, graph)
+                print(xy_start, xy_end)
+                path = calculate_path(graph, xy_start[0], xy_start[1], xy_end[0], xy_end[1], route_type)
                 path_parts = get_path_parts(path, drogi)
                 print(time.time() - start)
 
