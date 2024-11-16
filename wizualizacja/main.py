@@ -53,20 +53,17 @@ def translate_path_part_to_leaflet(path_part, transformer):
     return [x, y]
 
 
-def find_closest_node(x_start, y_start, graph):
+def find_closest_node2(x_start, y_start, graph):
     y, x = round(x_start), round(y_start)
     i = 0
     steps_to_take = 1
     current_direction_steps = 0
-    visited_points = []
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)] 
 
     while True:
         dx, dy = directions[i % 4]
         x += dx
         y += dy
-
-        visited_points.append((x, y))
 
         key = f"{x}_{y}"
         if key in graph.graph.keys():
@@ -79,4 +76,22 @@ def find_closest_node(x_start, y_start, graph):
             if i % 2 == 0:
                 steps_to_take += 1
 
+def find_closest_node(x_start, y_start, graph):
+    y, x = round(x_start), round(y_start)
+    i = 0
+    while True:
+        for _ in range(0,(i//2)+1):
+            if i % 4 == 0:
+                x+=1
+            elif i % 4 ==1:
+                y += 1
+            elif i % 4 == 2:
+                x-=1
+            else:
+                y-=1
+            key = f"{x}_{y}"
+            if key in graph.graph.keys():
+                return [x, y]
+        i+=1
+        
 
