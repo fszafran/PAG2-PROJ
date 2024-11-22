@@ -15,21 +15,33 @@
     </head>
     <body>
         <div id="m"></div>
-        <div class="radio-buttons">
-            <input type="radio" id="startPoint" name="pointType" value="start" checked>
-            <label for="startPoint">Wybierz punkt początkowy</label><br>
-            <input type="radio" id="endPoint" name="pointType" value="end">
-            <label for="endPoint">Wybierz punkt końcowy</label><br>
-            <label for="routeKind">Wybierz rodzaj trasy:</label>
-            <select id="routeKind">
-              <option value="0">Najszybsza</option>
-              <option value="1">Najkrotsza</option>
-              <option value="2">Atrakcyjna :)</option>
-            </select><br>
-            <button type = "button" id = "routeBtn" class="btn btn-primary">Wyznacz trase</button>        
+        <div class="container mt-4">
+            <div class="radio-buttons">
+                <h3>Wybór punktów i trasy</h3>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="startPoint" name="pointType" value="start" checked>
+                    <label class="form-check-label" for="startPoint">Wybierz punkt początkowy</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="endPoint" name="pointType" value="end">
+                    <label class="form-check-label" for="endPoint">Wybierz punkt końcowy</label>
+                </div>
+                <div class="mb-3">
+                    <label for="routeKind" class="form-label">Wybierz rodzaj trasy:</label>
+                    <select id="routeKind" class="form-select">
+                        <option value="0">Najszybsza</option>
+                        <option value="1">Najkrótsza</option>
+                        <option value="2">Atrakcyjna :)</option>
+                    </select>
+                </div>
+                <button type="button" id="routeBtn" class="btn btn-primary btn-lg me-2">Wyznacz trasę</button>
+                <button id="clearMapButton" class="btn btn-secondary btn-lg">Wyczyść mapę</button>
+            </div>
         </div>
+
         <input type="hidden" id="pathPartsInput" class="hidden-input">
-        <script src = "vis.js"></script>
+
+        <script src="vis.js"></script>
         <script type="py" src="main.py" config="config.toml"></script>
         <py-script>
             from pyodide.ffi import create_proxy
@@ -80,9 +92,10 @@
                 #479301_569080
                 xy_start = find_closest_node(xStart, yStart, graph)
                 xy_end = find_closest_node(xEnd, yEnd, graph)
-                print(xy_start, xy_end)
+                print("start: ", xy_start, "end: ", xy_end)
                 path = calculate_path(graph, xy_start[0], xy_start[1], xy_end[0], xy_end[1], route_type)
                 path_parts = get_path_parts(path, drogi)
+                print(path_parts)
                 print(time.time() - start)
 
                 path_parts_input = document.getElementById("pathPartsInput")
