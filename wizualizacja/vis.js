@@ -90,16 +90,27 @@ m.addEventListener('click', function(e) {
     }
 });
 
+// function drawPath(newValue) {
+//     // route.eachLayer(function (layer) {
+//     //     route.removeLayer(layer);
+//     // });
+//     // route.clearLayers();
+//     for (let i = 0; i < newValue.length; i++) {
+//         let part = newValue[i];
+//         L.polyline(part).addTo(route);
+//     }
+// }
+
 function drawPath(newValue) {
-    // route.eachLayer(function (layer) {
-    //     route.removeLayer(layer);
-    // });
-    // route.clearLayers();
+    route.clearLayers();
+
     for (let i = 0; i < newValue.length; i++) {
         let part = newValue[i];
+
         L.polyline(part).addTo(route);
     }
 }
+
 
 let inputBox = document.querySelector("#pathPartsInput");
 
@@ -127,3 +138,39 @@ function observeElement(element, property, callback, delay = 0) {
         });
     }
 }
+
+function clearMap() {
+    // Usuń trasę z mapy
+    route.clearLayers();
+
+    // Usuń znaczniki początkowy i końcowy
+    if (startMarker) {
+        m.removeLayer(startMarker);
+        startMarker = null;
+    }
+    if (endMarker) {
+        m.removeLayer(endMarker);
+        endMarker = null;
+    }
+
+    // Resetuj współrzędne punktów
+    xStart = NaN;
+    yStart = NaN;
+    xEnd = NaN;
+    yEnd = NaN;
+    window.xStart = xStart;
+    window.yStart = yStart;
+    window.xEnd = xEnd;
+    window.yEnd = yEnd;
+
+    // Resetuj dane trasy
+    path_parts = [];
+    const pathPartsInput = document.getElementById("pathPartsInput");
+    pathPartsInput.value = JSON.stringify([]); // Resetuj wartość ukrytego inputu
+
+    console.log("Mapa została wyczyszczona: trasa, znaczniki i dane zostały zresetowane.");
+}
+
+
+// Obsługa przycisku czyszczenia mapy
+document.getElementById("clearMapButton").addEventListener("click", clearMap);
