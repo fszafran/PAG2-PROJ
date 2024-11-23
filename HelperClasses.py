@@ -2,12 +2,12 @@ from typing import List, Tuple, Set, Dict
 from enum import Enum
 
 class Edge:
-    def __init__(self, id: int, id_from: str, id_to: str, length: float, road_category: int, number_of_attractions: int):
+    def __init__(self, id: int, id_from: str, id_to: str, length: float, road_spd_limit: int, number_of_attractions: int):
         self.id = id
         self.id_from = id_from
         self.id_to = id_to
         self.length = length
-        self.road_category = road_category
+        self.road_spd_limit = road_spd_limit
         self.number_of_attractions = number_of_attractions
 
     def get_end(self) -> str:
@@ -15,7 +15,7 @@ class Edge:
    
     def get_appropriate_cost(self, route_type: int) -> float:
         if route_type == 0:
-            return (self.length / self.road_category)
+            return (self.length / self.road_spd_limit)
         elif route_type == 1:
             return self.length
         elif route_type == 2:
@@ -38,7 +38,7 @@ class Edge:
             "id_from": self.id_from,
             "id_to": self.id_to,
             "length": self.length,
-            "road_category": self.road_category,
+            "road_category": self.road_spd_limit,
             "number_of_attractions": self.number_of_attractions
         }
 
@@ -85,7 +85,7 @@ class Graph:
             self.graph[edge.id_from].add_edge(edge)
 
         if edge.id_to in self.graph:
-            reversed_edge = Edge(edge.id, edge.id_to, edge.id_from, edge.length, edge.road_category, edge.number_of_attractions)
+            reversed_edge = Edge(edge.id, edge.id_to, edge.id_from, edge.length, edge.road_spd_limit, edge.number_of_attractions)
             self.graph[edge.id_to].add_edge(reversed_edge)
 
     def from_json(self, json_dict: Dict):
@@ -107,7 +107,7 @@ class Category(Enum):
     EKSPRESOWA = 120
     GLOWNA_RUCHU_PRZYSPIESZONEGO = 100
     GLOWNA = 90
-    ZBIORCZA = 70
+    ZBIORCZA = 80
     LOKALNA = 50
     DOJAZDOWA = 30
     INNA = 20

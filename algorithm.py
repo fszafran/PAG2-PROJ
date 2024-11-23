@@ -28,9 +28,9 @@ def algorithm(graph: Graph, start: List[float], end: List[float], heuristic_func
     open_set_hash = {start_node.id}
     
     while not open_set.empty():
-        current_node: Node = open_set.get()[1] # jezeli przetworzony, pass
+        current_node: Node = open_set.get()[1] 
 
-        if current_node.id not in open_set_hash:
+        if current_node.id not in open_set_hash:# jezeli przetworzony, pass
             continue
 
         open_set_hash.remove(current_node.id)
