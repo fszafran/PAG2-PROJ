@@ -4,7 +4,7 @@ import time
 from algorithm import algorithm
 import geopandas as gpd
 import json
-
+from collections import defaultdict
 def prepare_data(kopia_drogi_torun, atrakcje):
     """
     1. Tworzymy buffera dla dróg
@@ -27,7 +27,6 @@ def calculate_attraction_weights(attraction_counts: Set[int]) -> Dict[int, int]:
 def generate_graph(warstwa_drog) -> Graph:
     graph = Graph()
     attraction_counts = set()
-
     with arcpy.da.SearchCursor(warstwa_drog, ["Join_Count"]) as cursor:
         for row in cursor:
             attraction_counts.add(row[0])
@@ -36,8 +35,10 @@ def generate_graph(warstwa_drog) -> Graph:
     with arcpy.da.SearchCursor(warstwa_drog, ["SHAPE@", "Join_Count", "klasaDrogi"]) as cursor:
         for i, row in enumerate(cursor):
             geometry = row[0]
+            print("attr:", row[1])
+            print("waga:",  weighted_attractions[row[1]])
             attraction_number = weighted_attractions[row[1]] # im wiecej atrakcji tym mniejsza waga/koszt
-            klasa_drogi = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
+            spd_limit = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
             length = geometry.length
             
             firstX = geometry.firstPoint.X
@@ -53,7 +54,7 @@ def generate_graph(warstwa_drog) -> Graph:
             graph.add_node(firstNode)
             graph.add_node(lastNode)
 
-            edge = Edge(i, firstNode.id, lastNode.id, length, klasa_drogi, attraction_number)
+            edge = Edge(i, firstNode.id, lastNode.id, length, spd_limit, attraction_number)
             graph.add_edge(edge)
     return graph
 
@@ -81,7 +82,7 @@ def graph_to_JSON(graph: Graph) -> None:
         node_id: str
         node: Node
         json_dict[node_id] = node.to_json()
-    with open("graph.json", "w") as f:
+    with open("graph1.json", "w") as f:
         json.dump(json_dict, f, indent=4)
 
 if __name__ == "__main__":
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     # # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
 
     graph = generate_graph("kopia_drogi_torun")
-    # # graph_to_JSON(graph)
+    # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
     # print(algorithm(graph, [476023, 573797], [479470, 573184], 1))
     # graph = Graph("graph.json")

@@ -1,47 +1,23 @@
 let xStart=NaN, yStart=NaN, xEnd=NaN, yEnd=NaN;
 let startMarker = NaN;
 let endMarker = NaN;
+let inputBox = document.querySelector("#pathPartsInput");
+
 let m = L.map('m').setView([53.0138, 18.5984], 13);
-let route = L.layerGroup().addTo(m);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(m);
+
+let route = L.layerGroup().addTo(m);
 
 window.xStart = xStart;
 window.yStart = yStart;
 window.xEnd = xEnd;
 window.yEnd = yEnd;
 
-function transform4326To2180(lat, lng){
-    const sourceCoordinateSystem = 'EPSG:4326';
-    const targetCoordinateSystem = '+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs';
-    return proj4(sourceCoordinateSystem, targetCoordinateSystem, [lng, lat]);
-}
-
-function updateMarker(marker, latlng, pointType) {
-    let XY = transform4326To2180(latlng.lat, latlng.lng);
-    let x = XY[1];
-    let y = XY[0];
-    marker.setLatLng(latlng);
-    marker.getPopup().setContent(`<b>${pointType === 'start' ? 'Punkt początkowy' : 'Punkt końcowy'}:</b><br>X: ${x}<br>Y: ${y}`).openOn(m);
-    if (pointType === 'start') {
-        xStart = x;
-        yStart = y;
-        window.xStart = xStart;
-        window.yStart = yStart;
-        console.log(`Start point set to: ${xStart}, ${yStart}`);
-    } else {
-        xEnd = x;
-        yEnd = y;
-        window.xEnd = xEnd;
-        window.yEnd = yEnd;
-        console.log(`End point set to: ${xEnd}, ${yEnd}`);
-
-    }
-}
-
 m.addEventListener('click', function(e) {
+    route.clearLayers();
     const pointType = document.querySelector('input[name="pointType"]:checked').value;
     let lat = e.latlng.lat;
     let lng = e.latlng.lng;
@@ -54,18 +30,12 @@ m.addEventListener('click', function(e) {
         yStart = XY[0];
         window.xStart = xStart;
         window.yStart = yStart;
-        console.log(`Start point set to: ${xStart}, ${yStart}`);
         startMarker = L.marker([lat, lng], { draggable: true }).addTo(m);
-        startMarker.bindPopup(`<b>Punkt początkowy:</b><br>X: ${xStart}<br>Y: ${yStart}`).openPopup();
-        startMarker.on('dragend', function(event) {
-            let marker = event.target;
-            let position = marker.getLatLng();
-            updateMarker(marker, position, 'start');
+        geocode(lat, lng, function(address) {
+            startMarker.bindPopup(createPopupContent(pointType, xStart, yStart, address)).openPopup();
         });
-        startMarker.on('dblclick', function(event){
-            let marker = event.target;
-            m.removeLayer(marker);
-        });
+        setupMarkerEvents(startMarker, 'start');
+
     } else if (pointType === 'end') {
         if (endMarker) {
             m.removeLayer(endMarker);
@@ -75,48 +45,85 @@ m.addEventListener('click', function(e) {
         window.xEnd = xEnd;
         window.yEnd = yEnd;
         
-        console.log(`End point set to: ${xEnd}, ${yEnd}`);
         endMarker = L.marker([lat, lng], { draggable: true }).addTo(m);
-        endMarker.bindPopup(`<b>Punkt końcowy:</b><br>X: ${xEnd}<br>Y: ${yEnd}`).openPopup();
-        endMarker.on('dragend', function(event) {
-            let marker = event.target;
-            let position = marker.getLatLng();
-            updateMarker(marker, position, 'end');
+        geocode(lat, lng, function(address) {
+            endMarker.bindPopup(createPopupContent(pointType, xEnd, yEnd, address)).openPopup();
         });
-        endMarker.on('dblclick', function(event){
-            let marker = event.target;
-            m.removeLayer(marker);
-        });
+        setupMarkerEvents(endMarker, 'end');
     }
 });
 
-// function drawPath(newValue) {
-//     // route.eachLayer(function (layer) {
-//     //     route.removeLayer(layer);
-//     // });
-//     // route.clearLayers();
-//     for (let i = 0; i < newValue.length; i++) {
-//         let part = newValue[i];
-//         L.polyline(part).addTo(route);
-//     }
-// }
+function transform4326To2180(lat, lng){
+    const sourceCoordinateSystem = 'EPSG:4326';
+    const targetCoordinateSystem = '+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs';
+    return proj4(sourceCoordinateSystem, targetCoordinateSystem, [lng, lat]);
+}
 
-function drawPath(newValue) {
-    route.clearLayers();
+function geocode(lat, lng, callback) {
+    L.Control.Geocoder.nominatim().reverse(
+        { lat: lat, lng: lng },
+        m.options.crs.scale(m.getZoom()),
+        function(results) {
+            let result = results[0];
+            if (result) {
+                callback(result.name);
+            } else {
+                callback("Adres nieznaleziony");
+            }
+        }
+    );
+}
 
-    for (let i = 0; i < newValue.length; i++) {
-        let part = newValue[i];
+function createPopupContent(pointType, x, y, address){
+    return `
+        <div class="popup-content">
+            <b>${pointType === 'start' ? 'Punkt początkowy' : 'Punkt końcowy'}:</b><br>
+            <b>Adres:</b> <span class="address">${address}</span><br>
+            <b>X:</b> <span class="coordinate">${x.toFixed(2)} m</span><br>
+            <b>Y:</b> <span class="coordinate">${y.toFixed(2)} m</span><br>
+        </div>
+    `;
+}
 
-        L.polyline(part).addTo(route);
+function updateCoords(pointType, x, y){
+    if (pointType === 'start') {
+        xStart = x;
+        yStart = y;
+        window.xStart = xStart;
+        window.yStart = yStart;
+    } else {
+        xEnd = x;
+        yEnd = y;
+        window.xEnd = xEnd;
+        window.yEnd = yEnd;
     }
 }
 
+function setupMarkerEvents(marker, pointType) {
+    marker.on('dragend', function(event) {
+        let theMarker = event.target;
+        let position = marker.getLatLng();
+        updateMarker(theMarker, position, pointType);
+    });
+    marker.on('dblclick', function(event){
+        let theMarker = event.target;
+        m.removeLayer(theMarker);
+        route.clearLayers();
+        updateCoords(pointType, NaN, NaN);
+    });     
+}
 
-let inputBox = document.querySelector("#pathPartsInput");
-
-observeElement(inputBox, "value", function (oldValue, newValue) {
-    drawPath(JSON.parse(newValue));
-});
+function updateMarker(marker, latlng, pointType) {
+    route.clearLayers();
+    let XY = transform4326To2180(latlng.lat, latlng.lng);
+    let x = XY[1];
+    let y = XY[0];
+    marker.setLatLng(latlng);
+    geocode(latlng.lat, latlng.lng, function(address) {
+        marker.getPopup().setContent(createPopupContent(pointType, x, y, address)).openOn(m);
+    });    
+    updateCoords(pointType, x, y);
+}
 
 function observeElement(element, property, callback, delay = 0) {
     let elementPrototype = Object.getPrototypeOf(element);
@@ -139,11 +146,22 @@ function observeElement(element, property, callback, delay = 0) {
     }
 }
 
+observeElement(inputBox, "value", function (oldValue, newValue) {
+    drawPath(JSON.parse(newValue));
+});
+
+function drawPath(newValue) {
+    route.clearLayers();
+    m.closePopup();
+    for (let i = 0; i < newValue.length; i++) {
+        let part = newValue[i];
+        L.polyline(part, {color: '#007FFF', weight: 5}).addTo(route);
+    }
+}
+
 function clearMap() {
-    // Usuń trasę z mapy
     route.clearLayers();
 
-    // Usuń znaczniki początkowy i końcowy
     if (startMarker) {
         m.removeLayer(startMarker);
         startMarker = null;
@@ -153,7 +171,6 @@ function clearMap() {
         endMarker = null;
     }
 
-    // Resetuj współrzędne punktów
     xStart = NaN;
     yStart = NaN;
     xEnd = NaN;
@@ -163,14 +180,8 @@ function clearMap() {
     window.xEnd = xEnd;
     window.yEnd = yEnd;
 
-    // Resetuj dane trasy
     path_parts = [];
     const pathPartsInput = document.getElementById("pathPartsInput");
-    pathPartsInput.value = JSON.stringify([]); // Resetuj wartość ukrytego inputu
-
-    console.log("Mapa została wyczyszczona: trasa, znaczniki i dane zostały zresetowane.");
+    pathPartsInput.value = JSON.stringify([]);
 }
-
-
-// Obsługa przycisku czyszczenia mapy
 document.getElementById("clearMapButton").addEventListener("click", clearMap);
