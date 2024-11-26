@@ -4,7 +4,7 @@ Algorytm A* zaimplementowany został w języku Python z wykorzystaniem struktur 
 - trasa najkrótsza
 - trasa specjalna - trasa przebiegająca przy największej liczbie atrakcji (przyjęty promień 25m wokół drogi)
 
-Projekt zakładał także stworzenie grafu, na podstawie sieci drogowej w formie pliku .shp. Graf został wygenerowany zgodnie z podejściem obiektowym [HelperClasses.py](https://github.com/fszafran/PAG2-PROJ/blob/main/HelperClasses.py) i jest reprezentowany i używany w formie pliku .json [graph.json](https://raw.githubusercontent.com/fszafran/PAG2-PROJ/refs/heads/main/graph.json). W zaimplementowanej wersji graf został wygenerowany dla sieci drogowej miasta Toruń, pobranej z bazy danych przestrzennych BDOT10k.
+Projekt wymagał także stworzenia grafu, na podstawie sieci drogowej w formie pliku .shp. Graf został wygenerowany zgodnie z podejściem obiektowym [HelperClasses.py](https://github.com/fszafran/PAG2-PROJ/blob/main/HelperClasses.py) i jest reprezentowany i używany w formie pliku .json [graph.json](https://raw.githubusercontent.com/fszafran/PAG2-PROJ/refs/heads/main/graph.json). W obecnej wersji graf został wygenerowany dla sieci drogowej miasta Toruń, pobranej z bazy danych przestrzennych BDOT10k.
 
 Wizualizacja wykonana została przy pomocy frameworka [pyscript](https://pyscript.net/) oraz biblioteki JavaScript [Leaflet](https://leafletjs.com/)
 <div align="center">
