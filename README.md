@@ -1,5 +1,5 @@
 # Implementacja i wizualizacja działania algorytmu A*
-Algorytm A* zaimplementowany został w języku Python z wykorzystaniem struktur danych optymalizujących czas wykonywania: https://github.com/fszafran/PAG2-PROJ/blob/main/algorithm.py. Nasza implementacja zakłada parametryzację, pozwalającą na wybór rodzaju trasy: 
+Algorytm A* zaimplementowany został w języku Python z wykorzystaniem struktur danych optymalizujących czas wykonywania: [algorithm.py](https://github.com/fszafran/PAG2-PROJ/blob/main/algorithm.py). Nasza implementacja zakłada parametryzację, pozwalającą na wybór rodzaju trasy: 
 - trasa najszybsza
 - trasa najkrótsza
 - trasa specjalna - trasa przebiegająca przy największej liczbie atrakcji (przyjęty promień 25m wokół drogi)
