@@ -153,10 +153,16 @@ observeElement(inputBox, "value", function (oldValue, newValue) {
 function drawPath(newValue) {
     route.clearLayers();
     m.closePopup();
+
+    let latLngs = [];
     for (let i = 0; i < newValue.length; i++) {
         let part = newValue[i];
+        latLngs = latLngs.concat(part);
         L.polyline(part, {color: '#007FFF', weight: 5}).addTo(route);
     }
+
+    let bounds = L.latLngBounds(latLngs);
+    m.fitBounds(bounds, {padding: [30,30]});
 }
 
 function clearMap() {

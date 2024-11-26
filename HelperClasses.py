@@ -1,5 +1,6 @@
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Dict
 from enum import Enum
+import json
 
 class Edge:
     def __init__(self, id: int, id_from: str, id_to: str, length: float, road_spd_limit: int, number_of_attractions: int):
@@ -88,6 +89,15 @@ class Graph:
             reversed_edge = Edge(edge.id, edge.id_to, edge.id_from, edge.length, edge.road_spd_limit, edge.number_of_attractions)
             self.graph[edge.id_to].add_edge(reversed_edge)
 
+    def to_JSON(self, directory: str) -> None:
+        json_dict = {}
+        for node_id, node in self.graph.items():
+            node_id: str
+            node: Node
+            json_dict[node_id] = node.to_json()
+        with open(directory, "w") as f:
+            json.dump(json_dict, f, indent=4)
+    
     def from_json(self, json_dict: Dict):
         for _, node in json_dict.items():
             x = node["x"]

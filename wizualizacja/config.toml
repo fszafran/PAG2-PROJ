@@ -1,4 +1,4 @@
-packages = ["numpy", "pyproj"]
+packages = ["pyproj"]
 
 interpreter = "0.23.4"
 
