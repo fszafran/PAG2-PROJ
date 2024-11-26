@@ -4,7 +4,8 @@ import time
 from algorithm import algorithm
 import geopandas as gpd
 import json
-from collections import defaultdict
+from typing import Set
+
 def prepare_data(kopia_drogi_torun, atrakcje):
     """
     1. Tworzymy buffera dla dróg
@@ -76,15 +77,6 @@ def roads_to_JSON(warstwa_drog: str) -> None:
     with open("roads.json", "w") as f:
         json.dump(json_dict, f, indent=4)
     
-def graph_to_JSON(graph: Graph) -> None:
-    json_dict = {}
-    for node_id, node in graph.graph.items():
-        node_id: str
-        node: Node
-        json_dict[node_id] = node.to_json()
-    with open("graph1.json", "w") as f:
-        json.dump(json_dict, f, indent=4)
-
 if __name__ == "__main__":
     start = time.time()
     arcpy.env.workspace = r"C:\Users\filo1\Desktop\szkola_sem5\PAG2\proj1\arcgis_proj\MyProject.gdb"
@@ -97,6 +89,7 @@ if __name__ == "__main__":
     # # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
 
     graph = generate_graph("kopia_drogi_torun")
+    #graph.to_JSON("graph.json")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
     # print(algorithm(graph, [476023, 573797], [479470, 573184], 1))

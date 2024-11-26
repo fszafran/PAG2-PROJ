@@ -1,13 +1,11 @@
-import numpy as np
 from algorithm import algorithm
-from HelperClasses import Node
-import numpy as np
 from pyproj import CRS, Transformer
+import math
 
 def heuristic(from_node_id: str, to_node_id: str) -> float:
     x1, y1 = map(float, from_node_id.split("_"))
     x2, y2 = map(float, to_node_id.split("_"))
-    return np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
 def calculate_path(graph, x_start, y_start, x_end, y_end, route_type):
     start = [x_start, y_start]
@@ -48,13 +46,11 @@ def get_path_parts(path, drogi):
 
         if key1 in drogi:
             path_part = drogi[key1]
-            translated_path_part = [
-                translate_path_part_to_leaflet(part, transformer) for part in path_part]
+            translated_path_part = [translate_path_part_to_leaflet(part, transformer) for part in path_part]
             path_parts.append(translated_path_part)
         elif key2 in drogi:
             path_part = drogi[key2]
-            translated_path_part = [
-                translate_path_part_to_leaflet(part, transformer) for part in path_part]
+            translated_path_part = [translate_path_part_to_leaflet(part, transformer) for part in path_part]
             path_parts.append(translated_path_part)
         else:
             raise KeyError(f"Neither {key1} nor {key2} found in drogi")
