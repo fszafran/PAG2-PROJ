@@ -1,3 +1,4 @@
+Obiekty punktowe zostały pobrane z bazy danych OSM.
 Za atrakcje turystyczne przy tworzeniu warstwy uznane zostały obiekty:
 1. gift shop
 2. city wall
@@ -10,4 +11,4 @@ Za atrakcje turystyczne przy tworzeniu warstwy uznane zostały obiekty:
 9. museum
 10. viewpoint
 11.tourist attraction
-Obiektów na terenie Torunia jest 492.
+Obiektów zgodnych z tą specyfikacją na terenie Torunia jest 492.
