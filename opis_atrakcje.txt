@@ -9,5 +9,5 @@ Za atrakcje turystyczne przy tworzeniu warstwy uznane zostały obiekty:
 8. tourist information
 9. museum
 10. viewpoint
-11. atourist attraction
-Obiektów jest 492
+11.tourist attraction
+Obiektów na terenie Torunia jest 492.
