@@ -42,6 +42,13 @@ class Edge:
             "road_category": self.road_spd_limit,
             "number_of_attractions": self.number_of_attractions
         }
+    
+    def to_neo4j(self):
+        return f"""
+            MATCH (from: Node {{id: {self.id_from}}}), (to: Node {{id: {self.id_to}}})
+            MERGE (from)-[:Edge {{id: {self.id}, length: {self.length}, road_spd_limit: {self.road_spd_limit}, number_of_attractions: {self.number_of_attractions}}}]-(to)
+            """
+
 
 class Node:
     def __init__(self, x: float, y: float):
@@ -70,6 +77,12 @@ class Node:
             "y": self.y,
             "edges": [edge.to_json() for edge in self.edges]
         }
+    
+    def to_neo4j(self):
+        return f"""
+            MERGE (n:Node {{id: {self.id}, x: {self.x}, y: {self.y}}})
+            """
+
 
 class Graph:
     def __init__(self, json_file: str = None):
@@ -111,7 +124,20 @@ class Graph:
                 road_category = edge["road_category"]
                 number_of_attractions = edge["number_of_attractions"]
                 self.graph[id_from].add_edge(Edge(id, id_from, id_to, length, road_category, number_of_attractions))
+    
+    def to_neo4j(self, db_URL: str, db_AUTH: Tuple[str, str], database_name: str) -> None:
+        neo4j_driver = self.initialize_neo4j_driver(db_URL, db_AUTH)
+        for _, node in self.graph.items():
+            neo4j_driver.execute_query(node.to_neo4j(), database_=database_name)
+            for edge in node.edges:
+                neo4j_driver.execute_query(edge.to_neo4j(), database_=database_name)
+        neo4j_driver.close()
 
+    def initialize_neo4j_driver(self, URI: str, AUTH: Tuple[str, str]):
+        import neo4j
+        return neo4j.GraphDatabase.driver(URI, auth=AUTH)  
+        
+        
 class Category(Enum):
     AUTOSTRADA = 140
     EKSPRESOWA = 120
@@ -122,6 +148,7 @@ class Category(Enum):
     DOJAZDOWA = 30
     INNA = 20
     BRAK_KATEGORII = 5
+
 
 class CategoryFactory:
     @staticmethod
@@ -144,3 +171,6 @@ class CategoryFactory:
             return Category.INNA
         else:
             return Category.BRAK_KATEGORII
+
+if __name__=="__main__":
+    graph = Graph()

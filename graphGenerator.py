@@ -7,37 +7,34 @@ import json
 from typing import Set
 
 def prepare_data(kopia_drogi_torun, atrakcje):
-    """
-    1. Tworzymy buffera dla dróg
-    2. Spatial join łączy warstwy jeżeli punkty mają styczność z bufferami, 
-    przy okazji generuje pole Join_Count z liczbą punktow w bufferze
-    3. Łączymy warstwy po ID1 i dodajemy join count do drog (warto działać na kopii warstwy)
-    """
     bufferedDrogi = arcpy.analysis.Buffer(kopia_drogi_torun, "bufferedDrogi.shp", "25 meters", dissolve_option="NONE", dissolve_field=None, method="PLANAR")
     joined = arcpy.analysis.SpatialJoin(bufferedDrogi, atrakcje, "attractions_near_roads", "JOIN_ONE_TO_ONE", "KEEP_ALL", None, "INTERSECT")
     arcpy.management.JoinField(kopia_drogi_torun, "ID1", joined, "ID1", ["Join_Count"])
     return kopia_drogi_torun
 
-def calculate_attraction_weights(attraction_counts: Set[int]) -> Dict[int, int]:
+def calculate_attraction_weights(attraction_counts: Set[int], max_length: float) -> Dict[int, int]:
     weighted_attractions = {}
     sorted_counts = sorted(attraction_counts, reverse=True)
     for i, count in enumerate(sorted_counts):
-        weighted_attractions[count] = i + 1
+        weighted_attractions[count] = i + 1 + int(max_length)
     return weighted_attractions
 
 def generate_graph(warstwa_drog) -> Graph:
     graph = Graph()
     attraction_counts = set()
-    with arcpy.da.SearchCursor(warstwa_drog, ["Join_Count"]) as cursor:
+    max_length = 0
+    with arcpy.da.SearchCursor(warstwa_drog, ["Join_Count", "SHAPE@"]) as cursor:
         for row in cursor:
+            geometry = row[1]
             attraction_counts.add(row[0])
-    weighted_attractions: Dict[int, int] = calculate_attraction_weights(attraction_counts)
+            max_length = max(max_length, geometry.length)
+    weighted_attractions: Dict[int, int] = calculate_attraction_weights(attraction_counts, max_length)
 
     with arcpy.da.SearchCursor(warstwa_drog, ["SHAPE@", "Join_Count", "klasaDrogi"]) as cursor:
         for i, row in enumerate(cursor):
             geometry = row[0]
-            print("attr:", row[1])
-            print("waga:",  weighted_attractions[row[1]])
+            # print("attr:", row[1])
+            # print("waga:",  weighted_attractions[row[1]])
             attraction_number = weighted_attractions[row[1]] # im wiecej atrakcji tym mniejsza waga/koszt
             spd_limit = CategoryFactory.get_category(row[2]).value # zwroci predkosc przyjeta dla danej kategorii drogi
             length = geometry.length
@@ -50,8 +47,6 @@ def generate_graph(warstwa_drog) -> Graph:
             firstNode = Node(firstX, firstY)
             lastNode = Node(lastX, lastY)
 
-            print(firstNode.id, lastNode.id)
-
             graph.add_node(firstNode)
             graph.add_node(lastNode)
 
@@ -59,6 +54,8 @@ def generate_graph(warstwa_drog) -> Graph:
             graph.add_edge(edge)
     return graph
 
+def connect_to_db(): 
+    pass
 def roads_to_JSON(warstwa_drog: str) -> None:
     json_dict = {}
     gdf = gpd.read_file(warstwa_drog)
@@ -87,8 +84,12 @@ if __name__ == "__main__":
 
     # # kopia_drogi_torun = arcpy.management.CopyFeatures(drogi_torun, "kopia_drogi_torun")
     # # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
-
     graph = generate_graph("kopia_drogi_torun")
+
+    URI = "bolt://localhost:7687"
+    AUTH = ("neo4j", "69mtdew420")
+    graph.to_neo4j(URI, AUTH, "siecdrogowa")
+
     #graph.to_JSON("graph.json")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
