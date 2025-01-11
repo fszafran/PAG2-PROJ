@@ -60,18 +60,22 @@ function transform4326To2180(lat, lng){
 }
 
 function geocode(lat, lng, callback) {
-    L.Control.Geocoder.nominatim().reverse(
-        { lat: lat, lng: lng },
-        m.options.crs.scale(m.getZoom()),
-        function(results) {
-            let result = results[0];
-            if (result) {
-                callback(result.name);
+    zoom = m.getZoom();
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=${zoom}&addressdetails=1`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.display_name) {
+                callback(data.display_name);
             } else {
                 callback("Adres nieznaleziony");
             }
-        }
-    );
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            callback("Adres nieznaleziony");
+        });
 }
 
 function createPopupContent(pointType, x, y, address){
