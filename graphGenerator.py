@@ -86,9 +86,9 @@ if __name__ == "__main__":
     # # kopia_drogi_torun = prepare_data(kopia_drogi_torun, atrakcjeLayer)
     graph = generate_graph("kopia_drogi_torun")
 
-    URI = "bolt://localhost:7687"
-    AUTH = ("neo4j", "69mtdew420")
-    graph.to_neo4j(URI, AUTH, "siecdrogowa")
+    URI = "uri"
+    AUTH = ("usrnm", "pass")
+    graph.to_neo4j(URI, AUTH, "db_name")
 
     #graph.to_JSON("graph.json")
     # roads_to_JSON(r"drogi_shp\kopia_drogi_torun.shp")
