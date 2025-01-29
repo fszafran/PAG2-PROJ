@@ -46,9 +46,15 @@ class Edge:
     def to_neo4j(self):
         return f"""
             MATCH (from: Node {{id: {self.id_from}}}), (to: Node {{id: {self.id_to}}})
-            MERGE (from)-[:Edge {{id: {self.id}, length: {self.length}, road_spd_limit: {self.road_spd_limit}, number_of_attractions: {self.number_of_attractions}}}]-(to)
-            """
+            
+            MERGE (from)-[:Edge {{id: {self.id}, length: {self.length}, 
+            road_spd_limit: {self.road_spd_limit}, 
+            number_of_attractions: {self.number_of_attractions}}}]->(to)
 
+            MERGE (to)-[:Edge {{id: {self.id}, length: {self.length}, 
+            road_spd_limit: {self.road_spd_limit}, 
+            number_of_attractions: {self.number_of_attractions}}}]->(from)
+            """
 
 class Node:
     def __init__(self, x: float, y: float):
